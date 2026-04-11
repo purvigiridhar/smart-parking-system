@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────
 SERIAL_PORT   = "COM5"        # Windows: "COM3", "COM4" etc.
-                              # Linux/Mac: "/dev/ttyUSB0" or "/dev/ttyACM0"
+                            
 BAUD_RATE     = 9600
 FARE_PER_CAR  = 100
 TOTAL_SLOTS   = 4
