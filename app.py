@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────
 SERIAL_PORT   = "COM5"        # Windows: "COM3", "COM4" etc.
-                            
+                             
 BAUD_RATE     = 9600
 FARE_PER_CAR  = 100
 TOTAL_SLOTS   = 4
@@ -41,19 +41,29 @@ def add_log(event_type, message):
 
 def process_line(line):
     line = line.strip()
+    print(f"[SERIAL] {line}")   # log every line so you can debug easily
+
     with lock:
-        if line == "Car Entered":
+        # ── entry confirmed ──
+        if "CAR_ENTERED" in line:
             state["total_entered"]  += 1
             state["fare_collected"] += FARE_PER_CAR
-            add_log("ENTRY", "Car entered — barrier opened")
+            add_log("ENTRY", "Car entered — barrier closed")
 
-        elif line == "Car Exited":
+        # ── exit confirmed ──
+        elif "CAR_EXITED" in line:
             state["total_exited"] += 1
-            add_log("EXIT", "Car exited — barrier opened")
+            add_log("EXIT", "Car exited — barrier closed")
 
-        elif line == "Parking FULL":
+        # ── parking full ──
+        elif "PARKING_FULL" in line:
             add_log("ALERT", "Parking full — entry denied")
 
+        # ── timeout warning ──
+        elif "TIMEOUT" in line:
+            add_log("ALERT", f"Sensor timeout — barrier force closed")
+
+        # ── car count from Arduino ──
         elif line.startswith("Cars Inside:"):
             try:
                 n = int(line.split(":")[1].strip())
